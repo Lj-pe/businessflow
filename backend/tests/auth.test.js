@@ -68,4 +68,8 @@ describe('POST /api/auth/register', () => {
             .toBe('Role does not exist');
     });
 
+    afterAll(async () => {
+        await pool.end();
+    });
+
 });

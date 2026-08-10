@@ -130,6 +130,12 @@ describe('POST /api/auth/login', () => {
         const email = 'login-test@example.com';
         const password = '123456';
 
+        // Eliminar cualquier usuario anterior de esta prueba
+        await pool.execute(
+            'DELETE FROM users WHERE email = ?',
+            [email]
+        );
+
         const passwordHash = await bcrypt.hash(password, 10);
 
         const [result] = await pool.execute(
@@ -157,6 +163,7 @@ describe('POST /api/auth/login', () => {
         expect(response.body.user.email)
             .toBe(email);
 
+        // Eliminar el usuario creado por la prueba
         await pool.execute(
             'DELETE FROM users WHERE id = ?',
             [result.insertId]

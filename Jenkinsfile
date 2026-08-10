@@ -8,6 +8,8 @@ pipeline {
         DB_PASSWORD = ''
         DB_NAME = 'businessflow'
         DB_PORT = '3306'
+
+        JWT_SECRET = credentials('businessflow-jwt-secret')
     }
 
     stages {

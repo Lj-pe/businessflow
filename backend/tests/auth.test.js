@@ -2,6 +2,7 @@ const request = require('supertest');
 const app = require('../src/app');
 const pool = require('../src/config/database');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 describe('POST /api/auth/register', () => {
 
@@ -130,7 +131,6 @@ describe('POST /api/auth/login', () => {
         const email = 'login-test@example.com';
         const password = '123456';
 
-        // Eliminar cualquier usuario anterior de esta prueba
         await pool.execute(
             'DELETE FROM users WHERE email = ?',
             [email]
@@ -163,11 +163,67 @@ describe('POST /api/auth/login', () => {
         expect(response.body.user.email)
             .toBe(email);
 
-        // Eliminar el usuario creado por la prueba
         await pool.execute(
             'DELETE FROM users WHERE id = ?',
             [result.insertId]
         );
+    });
+
+});
+
+
+describe('GET /api/auth/profile', () => {
+
+    test('should reject access without token', async () => {
+
+        const response = await request(app)
+            .get('/api/auth/profile');
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe('Access token required');
+    });
+
+
+    test('should reject access with invalid token', async () => {
+
+        const response = await request(app)
+            .get('/api/auth/profile')
+            .set('Authorization', 'Bearer token-invalido');
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe('Invalid or expired token');
+    });
+
+
+    test('should allow access with valid token', async () => {
+
+        const token = jwt.sign(
+            {
+                id: 1,
+                email: 'test@example.com',
+                role_id: 2
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        const response = await request(app)
+            .get('/api/auth/profile')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(200);
+
+        expect(response.body.message)
+            .toBe('Access granted');
+
+        expect(response.body.user.email)
+            .toBe('test@example.com');
     });
 
 });

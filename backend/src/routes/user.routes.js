@@ -4,6 +4,7 @@ const userController = require('../controllers/user.controller');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const { authorizeRole } = require('../middleware/role.middleware');
 
+
 const router = express.Router();
 
 
@@ -30,6 +31,33 @@ router.get(
     authenticateToken,
     authorizeRole([1]),
     userController.getUserById
+);
+
+
+// Crear usuario - SOLO ADMIN
+router.post(
+    '/',
+    authenticateToken,
+    authorizeRole([1]),
+    userController.createUser
+);
+
+
+// Actualizar usuario - SOLO ADMIN
+router.put(
+    '/:id',
+    authenticateToken,
+    authorizeRole([1]),
+    userController.updateUser
+);
+
+
+// Eliminar usuario - SOLO ADMIN
+router.delete(
+    '/:id',
+    authenticateToken,
+    authorizeRole([1]),
+    userController.deleteUser
 );
 
 

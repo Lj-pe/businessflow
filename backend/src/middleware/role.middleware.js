@@ -16,7 +16,9 @@ const authorizeRole = (allowedRoles) => {
 
         next();
     };
+
 };
+
 
 module.exports = {
     authorizeRole

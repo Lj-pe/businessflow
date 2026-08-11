@@ -299,6 +299,75 @@ describe('GET /api/auth/admin', () => {
 });
 
 
+describe('GET /api/users', () => {
+
+    test('should reject access without token', async () => {
+
+        const response = await request(app)
+            .get('/api/users');
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe('Access token required');
+    });
+
+
+    test('should reject access for non-admin user', async () => {
+
+        const token = jwt.sign(
+            {
+                id: 1,
+                email: 'employee@example.com',
+                role_id: 2
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        const response = await request(app)
+            .get('/api/users')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(403);
+
+        expect(response.body.message)
+            .toBe('Access denied');
+    });
+
+
+    test('should allow admin to get all users', async () => {
+
+        const token = jwt.sign(
+            {
+                id: 1,
+                email: 'admin@example.com',
+                role_id: 1
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        const response = await request(app)
+            .get('/api/users')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(200);
+
+        expect(response.body.users)
+            .toBeDefined();
+
+        expect(Array.isArray(response.body.users))
+            .toBe(true);
+    });
+
+});
+
+
 afterAll(async () => {
     await pool.end();
 });

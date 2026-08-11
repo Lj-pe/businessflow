@@ -368,6 +368,103 @@ describe('GET /api/users', () => {
 });
 
 
+describe('GET /api/users/:id', () => {
+
+    test('should reject access without token', async () => {
+
+        const response = await request(app)
+            .get('/api/users/1');
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe('Access token required');
+    });
+
+
+    test('should reject access for non-admin user', async () => {
+
+        const token = jwt.sign(
+            {
+                id: 1,
+                email: 'employee@example.com',
+                role_id: 2
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        const response = await request(app)
+            .get('/api/users/1')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(403);
+
+        expect(response.body.message)
+            .toBe('Access denied');
+    });
+
+
+    test('should return 404 when user does not exist', async () => {
+
+        const token = jwt.sign(
+            {
+                id: 1,
+                email: 'admin@example.com',
+                role_id: 1
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        const response = await request(app)
+            .get('/api/users/999999')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(404);
+
+        expect(response.body.message)
+            .toBe('User not found');
+    });
+
+
+    test('should allow admin to get user by id', async () => {
+
+        const token = jwt.sign(
+            {
+                id: 1,
+                email: 'admin@example.com',
+                role_id: 1
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        const response = await request(app)
+            .get('/api/users/1')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(200);
+
+        expect(response.body.user)
+            .toBeDefined();
+
+        expect(response.body.user.id)
+            .toBe(1);
+
+        expect(response.body.user.email)
+            .toBeDefined();
+    });
+
+});
+
+
 afterAll(async () => {
     await pool.end();
 });

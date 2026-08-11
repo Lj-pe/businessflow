@@ -4,6 +4,7 @@ const pool = require('../src/config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+
 describe('POST /api/auth/register', () => {
 
     test('should reject registration with missing fields', async () => {
@@ -224,6 +225,75 @@ describe('GET /api/auth/profile', () => {
 
         expect(response.body.user.email)
             .toBe('test@example.com');
+    });
+
+});
+
+
+describe('GET /api/auth/admin', () => {
+
+    test('should reject access without token', async () => {
+
+        const response = await request(app)
+            .get('/api/auth/admin');
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe('Access token required');
+    });
+
+
+    test('should reject access for non-admin user', async () => {
+
+        const token = jwt.sign(
+            {
+                id: 1,
+                email: 'employee@example.com',
+                role_id: 2
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        const response = await request(app)
+            .get('/api/auth/admin')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(403);
+
+        expect(response.body.message)
+            .toBe('Access denied');
+    });
+
+
+    test('should allow access for admin user', async () => {
+
+        const token = jwt.sign(
+            {
+                id: 1,
+                email: 'admin@example.com',
+                role_id: 1
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '1h'
+            }
+        );
+
+        const response = await request(app)
+            .get('/api/auth/admin')
+            .set('Authorization', `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(200);
+
+        expect(response.body.message)
+            .toBe('Admin access granted');
+
+        expect(response.body.user.role_id)
+            .toBe(1);
     });
 
 });

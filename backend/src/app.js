@@ -5,6 +5,7 @@ const pool = require('./config/database');
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
+const categoryRoutes = require('./routes/category.routes');
 
 const app = express();
 
@@ -14,8 +15,13 @@ app.use(express.json());
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
 
+
 // Rutas de usuarios
 app.use('/api/users', userRoutes);
+
+
+// Rutas de categorías
+app.use('/api/categories', categoryRoutes);
 
 
 // Health check
@@ -51,6 +57,7 @@ app.get('/api/health/db', async (req, res) => {
             status: 'error',
             database: 'disconnected'
         });
+
     }
 
 });

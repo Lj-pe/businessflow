@@ -6,6 +6,7 @@ const pool = require('./config/database');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
+const productRoutes = require('./routes/product.routes');
 
 const app = express();
 
@@ -22,6 +23,10 @@ app.use('/api/users', userRoutes);
 
 // Rutas de categorías
 app.use('/api/categories', categoryRoutes);
+
+
+// Rutas de productos
+app.use('/api/products', productRoutes);
 
 
 // Health check
@@ -51,13 +56,15 @@ app.get('/api/health/db', async (req, res) => {
 
     } catch (error) {
 
-        console.error('Database connection error:', error.message);
+        console.error(
+            'Database connection error:',
+            error.message
+        );
 
         res.status(500).json({
             status: 'error',
             database: 'disconnected'
         });
-
     }
 
 });

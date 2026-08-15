@@ -3,65 +3,52 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-const pool = require('./config/database');
-
 const authRoutes = require('./routes/auth.routes');
-const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
 const productRoutes = require('./routes/product.routes');
 const saleRoutes = require('./routes/sale.routes');
 
 const app = express();
 
+
+// Middleware
 app.use(express.json());
 
 
-// Rutas
+// Health check
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        message: 'BusinessFlow API is running'
+    });
+});
+
+
+// API routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/sales', saleRoutes);
 
 
-// Health check
-app.get('/api/health', (req, res) => {
+// 404
+app.use((req, res) => {
+    res.status(404).json({
+        message: 'Route not found'
+    });
+});
 
-    res.status(200).json({
-        status: 'ok',
-        service: 'BusinessFlow API'
+
+// Error handler
+app.use((err, req, res, next) => {
+
+    console.error('Server error:', err);
+
+    res.status(500).json({
+        message: 'Internal server error'
     });
 
 });
 
 
-// Health check de base de datos
-app.get('/api/health/db', async (req, res) => {
-
-    try {
-
-        await pool.execute('SELECT 1');
-
-        res.status(200).json({
-            status: 'ok',
-            database: 'connected'
-        });
-
-    } catch (error) {
-
-        console.error(
-            'Database connection error:',
-            error.message
-        );
-
-        res.status(500).json({
-            status: 'error',
-            database: 'disconnected'
-        });
-
-    }
-
-});
-
-
+// Export app
 module.exports = app;

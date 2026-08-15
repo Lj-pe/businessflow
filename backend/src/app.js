@@ -1,38 +1,33 @@
-require('dotenv').config();
-
 const express = require('express');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 const pool = require('./config/database');
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
 const productRoutes = require('./routes/product.routes');
+const saleRoutes = require('./routes/sale.routes');
 
 const app = express();
 
 app.use(express.json());
 
 
-// Rutas de autenticación
+// Rutas
 app.use('/api/auth', authRoutes);
-
-
-// Rutas de usuarios
 app.use('/api/users', userRoutes);
-
-
-// Rutas de categorías
 app.use('/api/categories', categoryRoutes);
-
-
-// Rutas de productos
 app.use('/api/products', productRoutes);
+app.use('/api/sales', saleRoutes);
 
 
 // Health check
 app.get('/api/health', (req, res) => {
 
-    res.json({
+    res.status(200).json({
         status: 'ok',
         service: 'BusinessFlow API'
     });
@@ -40,16 +35,14 @@ app.get('/api/health', (req, res) => {
 });
 
 
-// Health check de la base de datos
+// Health check de base de datos
 app.get('/api/health/db', async (req, res) => {
 
     try {
 
-        const connection = await pool.getConnection();
+        await pool.execute('SELECT 1');
 
-        connection.release();
-
-        res.json({
+        res.status(200).json({
             status: 'ok',
             database: 'connected'
         });
@@ -65,6 +58,7 @@ app.get('/api/health/db', async (req, res) => {
             status: 'error',
             database: 'disconnected'
         });
+
     }
 
 });

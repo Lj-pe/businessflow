@@ -49,10 +49,11 @@ pipeline {
 
                         echo %DOCKER_PASSWORD% | docker login -u "%DOCKER_USERNAME%" --password-stdin
 
-                        docker buildx build --push ^
-                          -t lenny1980/businessflow-backend:%BUILD_NUMBER% ^
-                          -t lenny1980/businessflow-backend:latest ^
-                          ./backend
+                        if errorlevel 1 exit /b 1
+
+                        docker buildx build --push -t lenny1980/businessflow-backend:%BUILD_NUMBER% -t lenny1980/businessflow-backend:latest ./backend
+
+                        if errorlevel 1 exit /b 1
 
                         docker logout
                     '''

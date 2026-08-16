@@ -4,7 +4,7 @@ pipeline {
     environment {
         DB_HOST = 'localhost'
         DB_USER = 'root'
-        DB_PASSWORD = ''
+        DB_PASSWORD = credentials('businessflow-db-password')
         DB_NAME = 'businessflow'
         DB_PORT = '3306'
 

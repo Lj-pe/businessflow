@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     environment {
@@ -6,7 +7,7 @@ pipeline {
         DB_USER = 'root'
         DB_PASSWORD = credentials('businessflow-db-password')
         DB_NAME = 'businessflow'
-        DB_PORT = '3306'
+        DB_PORT = '3307'
 
         JWT_SECRET = credentials('businessflow-jwt-secret')
     }

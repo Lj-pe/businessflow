@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     environment {
@@ -27,6 +26,12 @@ pipeline {
                 dir('backend') {
                     bat 'npm test'
                 }
+            }
+        }
+
+        stage('Build Docker image') {
+            steps {
+                bat 'docker build -t businessflow-backend:%BUILD_NUMBER% ./backend'
             }
         }
     }

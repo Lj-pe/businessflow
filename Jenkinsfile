@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     environment {
@@ -43,17 +42,24 @@ pipeline {
                     bat '''
                         @echo off
 
-                        set "DOCKER_CONFIG=%WORKSPACE%\\.docker"
-
-                        if not exist "%DOCKER_CONFIG%" mkdir "%DOCKER_CONFIG%"
-
                         echo %DOCKER_PASSWORD% | docker login -u "%DOCKER_USERNAME%" --password-stdin
 
-                        if errorlevel 1 exit /b 1
+                        if errorlevel 1 (
+                            echo Docker Hub login failed
+                            exit /b 1
+                        )
 
-                        docker buildx build --push -t lenny1980/businessflow-backend:%BUILD_NUMBER% -t lenny1980/businessflow-backend:latest ./backend
+                        echo Docker Hub login successful
 
-                        if errorlevel 1 exit /b 1
+                        docker buildx build --push ^
+                            -t lenny1980/businessflow-backend:%BUILD_NUMBER% ^
+                            -t lenny1980/businessflow-backend:latest ^
+                            ./backend
+
+                        if errorlevel 1 (
+                            echo Docker image build/push failed
+                            exit /b 1
+                        )
 
                         docker logout
                     '''

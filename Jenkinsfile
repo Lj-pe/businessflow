@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     environment {
@@ -29,7 +30,7 @@ pipeline {
             }
         }
 
-        stage('Build and Push Docker image') {
+        stage('Test Docker Hub login') {
             steps {
                 withCredentials([
                     usernamePassword(
@@ -42,6 +43,8 @@ pipeline {
                     bat '''
                         @echo off
 
+                        echo Probando Docker Hub con usuario: %DOCKER_USERNAME%
+
                         echo %DOCKER_PASSWORD% | docker login -u "%DOCKER_USERNAME%" --password-stdin
 
                         if errorlevel 1 (
@@ -49,17 +52,7 @@ pipeline {
                             exit /b 1
                         )
 
-                        echo Docker Hub login successful
-
-                        docker buildx build --push ^
-                            -t lenny1980/businessflow-backend:%BUILD_NUMBER% ^
-                            -t lenny1980/businessflow-backend:latest ^
-                            ./backend
-
-                        if errorlevel 1 (
-                            echo Docker image build/push failed
-                            exit /b 1
-                        )
+                        echo Docker Hub login OK
 
                         docker logout
                     '''

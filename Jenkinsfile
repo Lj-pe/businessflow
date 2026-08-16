@@ -39,9 +39,18 @@ pipeline {
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
-                    bat 'echo %DOCKER_PASSWORD% | docker login -u "%DOCKER_USERNAME%" --password-stdin'
-                    bat 'docker buildx build --push -t lenny1980/businessflow-backend:%BUILD_NUMBER% ./backend'
-                    bat 'docker logout'
+
+                    bat '''
+                        @echo off
+                        set "DOCKER_CONFIG=%WORKSPACE%\\.docker"
+                        if not exist "%DOCKER_CONFIG%" mkdir "%DOCKER_CONFIG%"
+
+                        echo %DOCKER_PASSWORD% | docker login -u "%DOCKER_USERNAME%" --password-stdin
+
+                        docker buildx build --push -t lenny1980/businessflow-backend:%BUILD_NUMBER% ./backend
+
+                        docker logout
+                    '''
                 }
             }
         }

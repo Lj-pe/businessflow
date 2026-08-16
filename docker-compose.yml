@@ -12,8 +12,7 @@ services:
       - businessflow-mysql-data:/var/lib/mysql
 
   backend:
-    build:
-      context: ./backend
+    image: lenny1980/businessflow-backend:latest
     container_name: businessflow-backend
     restart: unless-stopped
     ports:

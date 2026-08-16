@@ -1,8 +1,9 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const pool = require('../src/config/database');
 
 const createTestUser = async () => {
-    const email = `test-${Date.now()}@businessflow.com`;
+    const email = `test-${crypto.randomUUID()}@businessflow.com`;
     const password = 'Test123!';
     const passwordHash = await bcrypt.hash(password, 10);
 

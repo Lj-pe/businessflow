@@ -1,0 +1,32 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: businessflow-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: businessflow
+    ports:
+      - "3307:3306"
+    volumes:
+      - businessflow-mysql-data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./backend
+    container_name: businessflow-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: businessflow
+      DB_PORT: 3306
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - mysql
+
+volumes:
+  businessflow-mysql-data:

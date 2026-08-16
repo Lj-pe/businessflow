@@ -30,13 +30,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker image') {
-            steps {
-                bat 'docker build -t lenny1980/businessflow-backend:%BUILD_NUMBER% ./backend'
-            }
-        }
-
-        stage('Push Docker image') {
+        stage('Build and Push Docker image') {
             steps {
                 withCredentials([
                     usernamePassword(
@@ -45,8 +39,8 @@ pipeline {
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
-                    bat 'docker login -u "%DOCKER_USERNAME%" -p "%DOCKER_PASSWORD%"'
-                    bat 'docker push lenny1980/businessflow-backend:%BUILD_NUMBER%'
+                    bat 'echo %DOCKER_PASSWORD% | docker login -u "%DOCKER_USERNAME%" --password-stdin'
+                    bat 'docker buildx build --push -t lenny1980/businessflow-backend:%BUILD_NUMBER% ./backend'
                     bat 'docker logout'
                 }
             }

@@ -14,7 +14,7 @@ pipeline {
 
     stages {
 
-        stage('Install dependencies') {
+        stage('Install backend dependencies') {
             steps {
                 dir('backend') {
                     bat 'npm install'
@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Run tests') {
+        stage('Run backend tests') {
             steps {
                 dir('backend') {
                     bat 'npm test'
@@ -30,7 +30,23 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Install frontend dependencies') {
+            steps {
+                dir('frontend') {
+                    bat 'npm install'
+                }
+            }
+        }
+
+        stage('Build frontend') {
+            steps {
+                dir('frontend') {
+                    bat 'npm run build'
+                }
+            }
+        }
+
+        stage('Deploy backend') {
             steps {
                 dir('backend') {
                     bat '''
